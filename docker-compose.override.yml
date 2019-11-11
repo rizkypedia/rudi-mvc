@@ -1,0 +1,20 @@
+version: "3.5"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/app/Dockerfile
+    container_name: "${PROJECT_NAME}-app"
+    ports:
+      - "$APACHE_PORT:80"
+    working_dir: "/var/www/project"
+    env_file:
+      - ./.env
+    volumes:
+      - "$SYNC_PATH/:/var/www/project"
+      - "$DUMP_PATH/:/dump"
+    environment:
+      SSH_AUTH_SOCK: /ssh-agent
+    networks:
+      - app_network
+

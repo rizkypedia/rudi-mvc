@@ -1,0 +1,5 @@
+db_connection:
+  user: ''
+  password: ''
+  database: ''
+  host: ''

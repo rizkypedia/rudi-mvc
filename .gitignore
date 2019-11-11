@@ -1,0 +1,12 @@
+# For project specific ignore rules look at /project/.gitignore
+###############################################################
+
+# IDE and editor specific files #
+#################################
+nbproject
+.idea
+.env
+/project/app/config/database.yml
+/project/config/db_bootstrap.php
+/project/vendor
+
