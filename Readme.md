@@ -37,7 +37,7 @@ In setup/db_imports you'll find the sql dump file, which you can import it to yo
 
 Rename the project/app/config/database.yml.dist in project/app/config/database.yml and enter here your database credentials. 
 Optionally rename the project/config/db_bootstrap.php.dist in project/config/db_bootstrap.php and again place your database credentials here.
-This file is necessary, if you wish to interact with doctrin orm shell tools.
+This file is necessary, if you wish to interact with doctrine orm shell tools.
 
 ## Rudi-MVC Conventions
 
@@ -49,7 +49,7 @@ CustomController.php
 
 All Methods (or Actions) in a Controller must have the "Action" suffix e.g. ListAction
 
-###Views Template
+### Views Template
 
 All views Template are placed in project/src/Views/Templates and follows this simple convention:
 The Folder is named after the Controller and the template file in this folder is called after the Method without their suffix  
