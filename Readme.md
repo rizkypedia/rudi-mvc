@@ -33,7 +33,19 @@ If you dont wish to use docker, feel free to use it locally with Apache or nginx
 
 ## Database
 
-In setup/db_imports you'll find the sql dump file, which you can import it to your mysql database
+### Import database
+
+In setup/db_imports you'll find the sql dump file, which you can import it to your mysql database. In the virtual environment you'll find the dump under the folder /dump
+
+Go to the terminal, and enter following command
+
+```docker exec -it rudi-mvc-app bash```
+
+With this command you'll enter the virtual environment of the app. You can import the database by simply use the mysql Command:
+
+```mysql -u username -p database_name < /dump/rudi-mvc.sql.gz```
+
+### ORM Interactive Shell (Optional)
 
 Rename the project/app/config/database.yml.dist in project/app/config/database.yml and enter here your database credentials. 
 Optionally rename the project/config/db_bootstrap.php.dist in project/config/db_bootstrap.php and again place your database credentials here.
@@ -61,6 +73,15 @@ Method Name: ListAction
 
 The template should look like this
 project/app/src/Views/Templates/Custom/list.php
+
+#### Main Template / Main Layout Template
+
+The main layout template is called project/src/Views/Layout/rudi_template.php
+In each Sub Template you have to add following line on the top of template file:
+
+```$this->layout('shared::rudi_template', array('title' => 'Some Title'));```
+
+This will wrap your template content with the main Template.
 
 ### URL Conventions
 
