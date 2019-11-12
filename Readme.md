@@ -43,7 +43,7 @@ Go to the terminal, and enter following command
 
 With this command you'll enter the virtual environment of the app. You can import the database by simply use the mysql Command:
 
-```mysql -u username -p database_name < /dump/rudi-mvc.sql.gz```
+```mysql -u username -p database_name < zcat /dump/rudi-mvc.sql.gz```
 
 ### ORM Interactive Shell (Optional)
 
