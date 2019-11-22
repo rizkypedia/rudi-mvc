@@ -7,7 +7,7 @@ namespace RudiMVC\Controller;
 use RudiMVC\Core\Abstracts\AbstractView;
 use RudiMVC\Core\RudiController;
 use RudiMVC\Core\RudiEntityManager\RudiEntity;
-use RudiMVC\Core\Services\UrlStatusService;
+use RudiMVC\Core\Services\UptimeCheckerService;
 
 class LinksController extends RudiController {
 
@@ -20,7 +20,7 @@ class LinksController extends RudiController {
     }
 
     public function indexAction() {
-        $urlStatusService = new UrlStatusService();
+        $UptimeCheckerService = new UptimeCheckerService();
         $tblLinks = $this->entityManager->getEntityManager()->getRepository('RudiMVC\Entities\Links');
         $links = $tblLinks->findAll();
         $listallLinks = [];
@@ -31,7 +31,7 @@ class LinksController extends RudiController {
                 'linkText' => $link->getLinkText(),
                 'country' => $link->getCountry(),
                 'description' => $link->getDescription(),
-                'reachable' => $urlStatusService->check($link->getLink())
+                'reachable' => $UptimeCheckerService->isReachable($link->getLink())
             ];
         }
         $data['links'] = $listallLinks;
