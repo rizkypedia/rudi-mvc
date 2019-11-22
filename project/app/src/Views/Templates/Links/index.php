@@ -1,5 +1,5 @@
 <?php
-$this->layout('shared::rudi_template', array('title' => 'Index Page of Rudi'));
+$this->layout('shared::rudi_template', array('title' => 'Uptime Service'));
 echo "<h2>" . $message . "</h2>";
 
 ?>
