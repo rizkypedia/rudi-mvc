@@ -8,13 +8,12 @@ use RudiMVC\Core\Abstracts\AbstractView;
 class ControllerFactory {
 
     /**
-     * @param \RudiMVC\Core\Factories\AbstractView $view
+     * @param AbstractView $view
      * @param string $className
-     * @param string $namespace
      * @return AbstractController
      */
-    public static function create(AbstractView $view, string $className, string $namespace = DEFAULT_NAMESPACE):AbstractController {
-        $class = $namespace . "\\Controller\\" . $className . "Controller";
+    public static function create(AbstractView $view, string $className):AbstractController {
+        $class = DEFAULT_NAMESPACE . "\\" . CONTROLLER_SUFFIX . "\\" . $className . CONTROLLER_SUFFIX;
         $instance = new $class($view);
         return $instance;
     }

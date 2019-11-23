@@ -4,22 +4,30 @@ namespace RudiMVC\Core;
 class RequestSplitter{
     
      private static $instance = null;
-     
-      public static function getInstance(){
+
+    /**
+     * @return RequestSplitter|null
+     */
+    public static function getInstance(){
          if (null === self::$instance) {
              self::$instance = new self;
          }
          return self::$instance;
     }
-    
-    public function split_request($request):array {
+
+    /**
+     * @param string $requestUri
+     * @return array
+     */
+    public function split_request(string $requestUri):array {
 
         $requestParts = [];
-        if(!empty($request)){
-            $first_chr = substr($request, 0,1);
-            $req = $request;
-            if(preg_match("/\//",$first_chr)){
-                $req = substr($request, 1);
+        if(!empty($requestUri)){
+            $first_chr = substr($requestUri, 0,1);
+            $req = $requestUri;
+
+            if(preg_match("/\//", $first_chr)){
+                $req = substr($requestUri, 1);
             }
             
             $args = explode("/", $req);

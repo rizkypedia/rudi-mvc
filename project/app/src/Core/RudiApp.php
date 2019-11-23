@@ -9,7 +9,7 @@ class RudiApp {
 
     public static function init() {
 
-        $uri = $_SERVER['PATH_INFO'];
+        $uri = RudiRequest::getServerVariable('PATH_INFO');
 
         if (!empty($uri) && strlen($uri) > 1) {
             $requestSplitter = RequestSplitter::getInstance();
