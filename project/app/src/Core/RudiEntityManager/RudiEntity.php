@@ -22,27 +22,46 @@ class RudiEntity {
         $this->initOrmConfig();
     }
 
+    /**
+     * @return EntityManagerInterface
+     * @throws \Doctrine\ORM\ORMException
+     */
     public function getEntityManager():EntityManagerInterface {
         $entityManager = EntityManager::create($this->dbParams, $this->ormConfig);
         return $entityManager;
     }
 
+    /**
+     * @return array
+     */
     public function getDbParams():array {
         return $this->dbParams;
     }
 
+    /**
+     * @return Configuration
+     */
     public function getOrmConfig():Configuration {
         return $this->ormConfig;
     }
 
+    /**
+     * @return array
+     */
     public function getPaths():array {
         return $this->paths;
     }
 
+    /**
+     * @return bool
+     */
     public function getDevMode():bool {
         return $this->isDevmode;
     }
 
+    /**
+     *
+     */
     private function initDbParams():void {
         $this->dbParams = [
             'driver'   => 'pdo_mysql',
@@ -53,6 +72,9 @@ class RudiEntity {
         ];
     }
 
+    /**
+     *
+     */
     private function initOrmConfig(): void {
         $this->ormConfig = Setup::createAnnotationMetadataConfiguration($this->paths, $this->isDevmode, null, null, false);
     }
