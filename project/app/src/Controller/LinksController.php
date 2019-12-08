@@ -10,6 +10,7 @@ use RudiMVC\Core\RudiEntityManager\RudiEntity;
 use RudiMVC\Core\Services\UptimeCheckerService;
 use Nette\Forms\Form;
 use RudiMVC\Entities\Links;
+use RudiMVC\Entities\Urls;
 
 class LinksController extends RudiController {
 
@@ -23,17 +24,16 @@ class LinksController extends RudiController {
 
     public function indexAction() {
         $UptimeCheckerService = new UptimeCheckerService();
-        $tblLinks = $this->entityManager->getEntityManager()->getRepository('RudiMVC\Entities\Links');
-        $links = $tblLinks->findAll();
+        $tblLinks = $this->entityManager->getEntityManager()->getRepository('RudiMVC\Entities\Urls');
+        $urls = $tblLinks->findAll();
         $listallLinks = [];
-        foreach ($links as $link) {
+        foreach ($urls as $url) {
             $listallLinks[] = [
-                'id' => $link->getId(),
-                'link' => $link->getLink(),
-                'linkText' => $link->getLinkText(),
-                'country' => $link->getCountry(),
-                'description' => $link->getDescription(),
-                'reachable' => $UptimeCheckerService->isReachable($link->getLink())
+                'id' => $url->getId(),
+                'link' => $url->getUrl(),
+                'linkText' => $url->getUrlText(),
+                'description' => $url->getDescription(),
+                'reachable' => $UptimeCheckerService->isReachable($url->getUrl())
             ];
         }
         $data['links'] = $listallLinks;
@@ -50,9 +50,9 @@ class LinksController extends RudiController {
         $form = new Form;
         $form->setAction('/index.php/links/add');
         $form->setMethod('POST');
-        $form->addText('link', 'Link:');
-        $form->addText('linktext', 'Link-Text:');
-        $form->addText('country', 'Country');
+        $form->addText('url', 'Link:');
+        $form->addText('url_text', 'Url-Text:');
+
         $form->addTextArea('description', 'Description');
         $form->addSubmit('send', 'Add Link');
         $data['message'] = "Add new Link";
@@ -70,13 +70,13 @@ class LinksController extends RudiController {
     private function addLinkToDatabase($values):void {
 
         try {
-            $link = new Links();
-            $link->setLink($values->link);
-            $link->setLinkText($values->linktext);
-            $link->setCountry($values->country);
-            $link->setDescription($values->description);
-            $this->entityManager->getEntityManager()->persist($link);
-            $this->entityManager->getEntityManager()->flush();
+            $urls = new Urls();
+            $urls->setUrl($values->url);
+            $urls->setUrlText($values->url_text);
+            $urls->setDescription($values->description);
+            $em = $this->entityManager->getEntityManager();
+            $em->persist($urls);
+            $em->flush();
 
         } catch (\Exception $e) {
            echo $e->getMessage();

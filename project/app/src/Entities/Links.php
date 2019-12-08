@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Links
  *
- * @ORM\Table(name="Links")
+ * @ORM\Table(name="links")
  * @ORM\Entity
  */
 class Links
@@ -71,6 +71,7 @@ class Links
     public function setLink($link)
     {
         $this->link = $link;
+        return $this;
     }
 
     /**
@@ -93,8 +94,7 @@ class Links
     public function setLinkText($linkText)
     {
         $this->linkText = $linkText;
-
-
+        return $this;
     }
 
     /**
@@ -117,6 +117,7 @@ class Links
     public function setCountry($country)
     {
         $this->country = $country;
+        return $this;
     }
 
     /**
@@ -139,6 +140,7 @@ class Links
     public function setDescription($description)
     {
         $this->description = $description;
+        return $this;
 
     }
 
