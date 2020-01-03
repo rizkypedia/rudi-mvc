@@ -10,7 +10,7 @@ use RudiMVC\Core\RudiEntityManager\RudiEntity;
 use RudiMVC\Core\Services\UptimeCheckerService;
 use Nette\Forms\Form;
 use RudiMVC\Entities\Links;
-use RudiMVC\Entities\Urls;
+
 
 class LinksController extends RudiController {
 
@@ -24,16 +24,17 @@ class LinksController extends RudiController {
 
     public function indexAction() {
         $UptimeCheckerService = new UptimeCheckerService();
-        $tblLinks = $this->entityManager->getEntityManager()->getRepository('RudiMVC\Entities\Urls');
+        $tblLinks = $this->entityManager->getEntityManager()->getRepository('RudiMVC\Entities\Links');
         $urls = $tblLinks->findAll();
         $listallLinks = [];
         foreach ($urls as $url) {
             $listallLinks[] = [
                 'id' => $url->getId(),
-                'link' => $url->getUrl(),
-                'linkText' => $url->getUrlText(),
+                'link' => $url->getLink(),
+                'linkText' => $url->getLinkText(),
                 'description' => $url->getDescription(),
-                'reachable' => $UptimeCheckerService->isReachable($url->getUrl())
+                'country' => $url->getCountry(),
+                'reachable' => $UptimeCheckerService->isReachable($url->getLink())
             ];
         }
         $data['links'] = $listallLinks;
@@ -69,7 +70,7 @@ class LinksController extends RudiController {
      */
     private function addLinkToDatabase($values):void {
 
-        try {
+        /*try {
             $urls = new Urls();
             $urls->setUrl($values->url);
             $urls->setUrlText($values->url_text);
@@ -80,7 +81,7 @@ class LinksController extends RudiController {
 
         } catch (\Exception $e) {
            echo $e->getMessage();
-        }
+        }*/
 
 
     }

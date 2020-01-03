@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Links
  *
- * @ORM\Table(name="links")
+ * @ORM\Table(name="Links")
  * @ORM\Entity
  */
 class Links

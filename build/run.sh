@@ -1,47 +1,99 @@
 #!/usr/bin/env bash
 set -e
-BASEPATH="$(pwd)"
-cd $(git rev-parse --show-toplevel)
-# Load .env
-set -a
-[ -f .env.dist ] && . .env.dist
-[ -f .env ] && . .env
-set +a
-cd $BASEPATH
 
-APP_CONTAINER=`docker ps | grep "${PROJECT_NAME}-app"| egrep ".[a-z0-9]*" -o | head -1`
-export $(cat .env | xargs)
-function cli() {
-  echo "### CLI - ${PROJECT_NAME} ###"
-  docker exec -it ${APP_CONTAINER} /bin/bash
+function setup() {
+  BASEPATH="$(pwd)"
+  cd $(git rev-parse --show-toplevel)
+  # Load .env
+  set -a
+  _check_env
+  [ -f .env ] && . .env
+  set +a
+  cd $BASEPATH
+
+  APP_CONTAINER=$(docker ps | grep "${PROJECT_NAME}-app" | egrep ".[a-z0-9]*" -o | head -1)
+  export $(cat .env | xargs)
 }
-
-function test() {
-  docker-compose -f docker-compose.yml -f docker-compose.testing.yml build
-  docker-compose -f docker-compose.yml -f docker-compose.testing.yml up -d
-  docker exec ${PROJECT_NAME}-app composer coder-check /var/www/project
-  docker exec ${PROJECT_NAME}-app composer code-analyse /var/www/project
-  docker exec ${PROJECT_NAME}-app bin/phpunit .
-  docker exec ${PROJECT_NAME}-app bin/drush cr
-  docker exec ${PROJECT_NAME}-app bin/behat
-}
-
 
 function isFunction() { [[ "$(declare -Ff "$1")" ]]; }
 
 function main() {
-
-    if [[ -z $1 ]]
-    then
-        help
+  setup
+  if [[ -z $1 ]]; then
+    help
+  else
+    if isFunction $1; then
+      COMMAND=($@)
+      PARAMETERRS=${COMMAND[@]:1}
+      eval "$1 \"$PARAMETERRS\""
     else
-        if isFunction $1
-        then
-          eval "$1 $2"
-        else
-          echo "Command '$1' not found"
-        fi
+      echo "Command '$1' not found"
     fi
+  fi
+}
+
+function cli() {
+  if [[ ! -z $@ ]]; then
+    docker exec ${APP_CONTAINER} /bin/bash -c "$@"
+  else
+    echo "### CLI - ${PROJECT_NAME} ###"
+    docker exec -it ${APP_CONTAINER} /bin/bash
+  fi
+}
+
+function test-all() {
+  test-code
+  test-functional
+}
+
+function test-code() {
+  start-test
+  mkdir -p test-reports/
+  chmod 777 test-reports/
+  echo "[PHPCS]: Custom modules"
+  composer "coder-check /var/www/project/docroot/modules/custom"
+  echo "[PHPSTAN]: Custom modules"
+  composer "code-analyse /var/www/project/docroot/modules/custom"
+  echo "[PHPUNIT]: Custom modules"
+  cli bin/phpunit /var/www/project/docroot/modules/custom
+}
+
+function test-code-junit() {
+  start-test
+  mkdir -p test-reports/
+  chmod 777 test-reports/
+  echo "[PHPCS]: Custom modules"
+  composer "coder-check-junit /var/www/project/docroot/modules/custom"
+  echo "[PHPSTAN]: Custom modules"
+  composer "code-analyse-junit /var/www/project/docroot/modules/custom" >test-reports/phpstan-custom-modules.xml
+  echo "[PHPUNIT]: Custom modules"
+  cli bin/phpunit /var/www/project/docroot/modules/custom --log-junit test-reports/phpunit-custom.xml
+}
+
+function test-code-contrib() {
+  start-test
+  mkdir -p test-reports/
+  chmod 777 test-reports/
+  echo "[PHPSTAN]: Contrib profiles"
+  composer "code-analyse-junit /var/www/project/docroot/profiles/contrib" >test-reports/phpstan-contrib-profiles.xml
+  echo "[PHPUNIT]: Contrib Profiles"
+  cli bin/phpunit /var/www/project/docroot/profiles/contrib --log-junit test-reports/phpunit.xml
+}
+
+function test-functional() {
+  start-test
+  mkdir -p test-reports/
+  _update_translations
+  echo "Executing behat"
+  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c behat.dist.yml --suite=default --strict --colors --tags=$1"
+}
+
+function test-install() {
+  start-test
+  mkdir -p test-reports/
+  echo "Executing behat"
+  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c behat.dist.yml --suite=installation --strict --colors"
+  _update_translations
 }
 
 function help() {
@@ -59,9 +111,10 @@ function help() {
 }
 
 function setupdb() {
-  docker exec ${APP_CONTAINER} bin/drush updb -y --entity-updates
-  docker exec ${APP_CONTAINER} bin/drush cim -y
-  docker exec ${APP_CONTAINER} bin/drush locale-check && bin/drush locale-update
+  drush updb -y
+  drush cim -y
+  drush locale-check
+  drush locale-update
 }
 
 function log() {
@@ -69,15 +122,36 @@ function log() {
 }
 
 function build() {
-  docker-compose -f docker-compose.yml -f docker-compose.override.yml build
+  compose build
 }
 
 function start() {
-  docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+  _check_network
+  _check_traefik
+  _check_dns
+  compose up -d
+  _check_for_composer_install
+  echo "open http://${PROJECT_NAME}.${DOMAIN_SUFFIX} in browser"
+}
+
+function status() {
+  drush status
+}
+
+function compose() {
+  if [[ "$OSTYPE" == "linux-gnu" ]]; then
+    docker-compose -f docker-compose.yml -f docker-compose.linux.override.yml $@
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    docker-compose -f docker-compose.yml -f docker-compose.mac.override.yml $@
+  fi
+}
+
+function start-test() {
+  start
 }
 
 function stop() {
-  docker-compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.testing.yml stop
+  compose stop
 }
 
 function checkout() {
@@ -90,9 +164,8 @@ function checkout() {
 
 function import() {
   local IMPORT_NAME="${1:-/dump/${DUMP_NAME}}"
-
-  docker exec ${APP_CONTAINER} bin/drush sql-drop -y
-  docker exec ${APP_CONTAINER} /bin/bash -c "zcat $IMPORT_NAME | bin/drush sql:cli"
+  drush sql-drop -y
+  cli "zcat $IMPORT_NAME | bin/drush sql:cli"
   echo "Successfully imported: $IMPORT_NAME"
   setupdb
 }
@@ -100,6 +173,69 @@ function import() {
 function install() {
   sudo cp "$(pwd)/$0" /usr/local/bin/ppd
   echo "Installed $0 try out 'ppd'"
+}
+
+drush() {
+  cli "bin/drush $@"
+}
+
+composer() {
+  cli "bin/composer $@"
+}
+
+_update_translations() {
+  echo "### Update translations"
+  drush locale:check
+  drush locale:update
+  echo "### Clear cache"
+  drush cr
+}
+
+_check_network() {
+  NETWORK="$(docker network ls | grep web || true)"
+  if [[ ! $NETWORK ]]; then
+    docker network create web
+    echo "Created web network"
+  fi
+}
+
+_check_traefik() {
+  if [ ! -d ~/traefik ]; then
+    git clone git@bitbucket.org:publicplan/local-dev-traefik.git ~/traefik
+    cp ~/traefik/.env.dist ~/traefik/.env
+  fi
+  (cd ~/traefik && docker-compose up -d)
+}
+
+_check_dns() {
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    HASENTRY="$(cat /etc/hosts | grep ${PROJECT_NAME}.${DOMAIN_SUFFIX} || true)"
+    if [[ ! $HASENTRY ]]; then
+      sudo sh -c 'echo "127.0.0.1	${PROJECT_NAME}.${DOMAIN_SUFFIX}" >> /private/etc/hosts'
+      dscacheutil -flushcache || true
+      echo "Added ${PROJECT_NAME}.${DOMAIN_SUFFIX} to /private/etc/hosts"
+    fi
+  fi
+}
+
+_check_env() {
+  if [[ ! -f ".env" ]]; then
+    cp .env.dist .env
+    echo "Copied default .env"
+  fi
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ ! -f "/tmp/agent.sock" ]]; then
+      ln -sf $SSH_AUTH_SOCK /tmp/agent.sock
+      echo "Linked ssh-agent"
+    fi
+  fi
+}
+
+_check_for_composer_install() {
+  if [[ $INSTALL_COMPOSER_ON_STARTUP ]]; then
+    cli 'if [[ ! -d ./vendor ]]; then echo "Installing dependencies... " && composer i; fi'
+    echo "Installed dependencies"
+  fi
 }
 
 main $1 $2

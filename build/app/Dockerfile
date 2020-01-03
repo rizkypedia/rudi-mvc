@@ -1,7 +1,8 @@
 FROM php:7.3-apache-stretch
 
 ARG APACHE_DOCUMENT_ROOT=/var/www/project/webroot
-ARG PHP_MEMORY_LIMIT=512M
+ARG PHP_MEMORY_LIMIT=1G
+ARG PROJECT_NAME=rudi
 
 ENV APACHE_DOCUMENT_ROOT=$APACHE_DOCUMENT_ROOT
 ENV PHP_MEMORY_LIMIT=$PHP_MEMORY_LIMIT
@@ -12,8 +13,8 @@ ENV NVM_DIR=/use/local/bin/.nvm
 ENV NODE_VERSION=10.16.0
 
 # Configure apache
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-enabled/*.conf; \
-    sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e 's!/var/www/html!"${APACHE_DOCUMENT_ROOT}"!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!\#ServerName example.com!'"${PROJECT_NAME}"'.${DOMAIN_SUFFIX}:80!g'  /etc/apache2/sites-*/*.conf
 
 # Install development tools as well as additional packages and do a cleanup afterwards
 RUN apt-get update && apt-get install -y --no-install-recommends \
