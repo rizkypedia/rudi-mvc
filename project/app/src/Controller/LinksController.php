@@ -53,7 +53,7 @@ class LinksController extends RudiController {
         $form->setMethod('POST');
         $form->addText('url', 'Link:');
         $form->addText('url_text', 'Url-Text:');
-
+        $form->addText('country', 'country:');
         $form->addTextArea('description', 'Description');
         $form->addSubmit('send', 'Add Link');
         $data['message'] = "Add new Link";
@@ -70,18 +70,19 @@ class LinksController extends RudiController {
      */
     private function addLinkToDatabase($values):void {
 
-        /*try {
-            $urls = new Urls();
-            $urls->setUrl($values->url);
-            $urls->setUrlText($values->url_text);
+        try {
+            $urls = new Links();
+            $urls->setLink($values->url);
+            $urls->setLinkText($values->url_text);
             $urls->setDescription($values->description);
+            $urls->setCountry($values->description);
             $em = $this->entityManager->getEntityManager();
             $em->persist($urls);
             $em->flush();
 
         } catch (\Exception $e) {
            echo $e->getMessage();
-        }*/
+        }
 
 
     }
