@@ -4,12 +4,14 @@ namespace RudiMVC\Core;
 
 use RudiMVC\Core\Factories\ControllerFactory;
 use RudiMVC\Views\ViewMain;
+use Symfony\Component\HttpFoundation\Request;
 
 class RudiApp {
 
     public static function init() {
-
-        $uri = RudiRequest::getPathInfo();
+        
+        $request = Request::createFromGlobals();
+        $uri = $request->getPathInfo();
 
         if (!empty($uri) && strlen($uri) > 1) {
             $requestSplitter = RequestSplitter::getInstance();
