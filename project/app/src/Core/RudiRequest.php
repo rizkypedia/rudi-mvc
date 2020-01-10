@@ -3,15 +3,14 @@
 
 namespace RudiMVC\Core;
 
+use Symfony\Component\HttpFoundation\Request;
 
 class RudiRequest {
-
     /**
-     * @param string $serverKey
-     * @return string|null
+     * @return string
      */
-    public static function getServerVariable(string $serverKey):?string {
-        return $_SERVER[$serverKey];
+    public static function getPathInfo():string {
+        $request =  Request::createFromGlobals();
+        return $request->getPathInfo();
     }
-
 }
