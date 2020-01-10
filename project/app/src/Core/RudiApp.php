@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 class RudiApp {
 
     public static function init() {
-        
+
         $request = Request::createFromGlobals();
         $uri = $request->getPathInfo();
 
