@@ -5,7 +5,7 @@ is working.
 
 ## Pre-Requisits
 
-- PHP 7.1 or higher
+- PHP 7.4 or higher
 - MySql 5.5 or higher
 - Docker (optional) as an alternative you can use Apache or nginx Webserver
 
