@@ -9,4 +9,5 @@ nbproject
 /project/app/config/database.yml
 /project/config/db_bootstrap.php
 /project/vendor
+/build/
 
