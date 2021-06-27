@@ -1,28 +1,30 @@
 version: "3.5"
 services:
-  app:
-    build:
-      context: .
-      dockerfile: ./build/app/Dockerfile
-    container_name: "${PROJECT_NAME}-app"
-    working_dir: "/var/www/project"
+  traefik:
+    restart: always
+    image: library/traefik:v1.7-alpine
     env_file:
-      - ./.env
-    environment:
-      SSH_AUTH_SOCK: /ssh-agent
+      - .env
+    labels:
+      traefik.enable: true
+      traefik.frontend.rul: "Host.traefik.${DOMAIN_SUFFIX}"
+      traefik.port: 8080
+    container_name: ${PROJECT_NAME}-traefik
+    command:
+      - "--docker=true"
+      - "--docker.exposedbydefault=false"
+      - "--api"
+      - "--docker"
+      - "--docker.domain=${DOMAIN_SUFFIX}"
+      - "--docker.network=web"
+    ports:
+      - "80:80"
+      - "8080:8080"
     networks:
-      - app_network
-
-  mysql:
-    image: mysql:5.7
-    container_name: "${PROJECT_NAME}-mysql"
-    env_file:
-      - ./.env
-    command: "--max-allowed-packet=8388608"
+      - web
     volumes:
-      - /var/lib/mysql
-    networks:
-      - app_network
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 networks:
-  app_network:
-    driver: bridge
+  web:
+    external: true

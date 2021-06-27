@@ -11,7 +11,7 @@ function setup() {
   set +a
   cd $BASEPATH
 
-  APP_CONTAINER=$(docker ps | grep "${PROJECT_NAME}-app" | egrep ".[a-z0-9]*" -o | head -1)
+  export APP_CONTAINER=$(docker ps | grep "${PROJECT_NAME}-app" | egrep ".[a-z0-9]*" -o | head -1)
   export $(cat .env | xargs)
 }
 
@@ -85,14 +85,14 @@ function test-functional() {
   mkdir -p test-reports/
   _update_translations
   echo "Executing behat"
-  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c behat.dist.yml --suite=default --strict --colors --tags=$1"
+  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c testing/behat/behat.dist.yml --suite=default --strict --colors --tags=$1"
 }
 
 function test-install() {
   start-test
   mkdir -p test-reports/
   echo "Executing behat"
-  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c behat.dist.yml --suite=installation --strict --colors"
+  cli "bin/behat --format=pretty --format=junit --out=std --out=test-reports -c testing/behat/behat.dist.yml  --strict --colors"
   _update_translations
 }
 
@@ -126,12 +126,17 @@ function build() {
 }
 
 function start() {
+  _check_env
   _check_network
   _check_traefik
   _check_dns
   compose up -d
   _check_for_composer_install
   echo "open http://${PROJECT_NAME}.${DOMAIN_SUFFIX} in browser"
+}
+
+function clamav() {
+    cli "/etc/init.d/clamav-daemon $1"
 }
 
 function status() {
@@ -147,7 +152,7 @@ function compose() {
 }
 
 function start-test() {
-  start
+  compose -f docker-compose.testing.yml up -d
 }
 
 function stop() {
