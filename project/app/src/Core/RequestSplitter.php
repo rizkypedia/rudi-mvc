@@ -25,12 +25,16 @@ class RequestSplitter{
         if(!empty($requestUri)){
             $first_chr = substr($requestUri, 0,1);
             $req = $requestUri;
-
+           
             if(preg_match("/\//", $first_chr)){
-                $req = substr($requestUri, 1);
+               $req = substr($requestUri, 1);
             }
+
             
             $args = explode("/", $req);
+            $requestParts['api'] = false;
+      
+        
             $requestParts['controller'] = ucfirst($args[0]);
             $requestParts['action'] = (empty($args[1]) ? DEFAULT_CONTROLLER_ACTION . ACTION_SUFFIX : $args[1] . ACTION_SUFFIX);
 

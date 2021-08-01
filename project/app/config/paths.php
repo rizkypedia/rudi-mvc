@@ -19,3 +19,4 @@ define('VIEW_TEMPLATE', VIEW . DS . "Templates" . DS);
 define('WWW', PROJECT_ROOT_PATH . DS . "webroot" . DS);
 define('ENTITIES_LOCATION', APP . "Entities");
 define('DB_CONFIG_PATH', ROOT_PATH . DS . 'config/database.yml' );
+define('RUDI_API_PREFIX','api');

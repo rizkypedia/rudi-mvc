@@ -17,7 +17,8 @@
         "phpunit/phpunit": "^8.4",
         "nette/forms": "^3.0",
         "symfony/http-foundation": "^5.2.8",
-        "doctrine/orm": "^2.9"
+        "doctrine/orm": "^2.9",
+        "php-di/php-di": "^6.3"
     },
     "autoload": {
         "psr-4": {

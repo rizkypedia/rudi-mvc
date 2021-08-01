@@ -11,8 +11,8 @@ class RudiController extends AbstractController {
     protected function info() {
     }
 
-    public function __construct(AbstractView $view) {
-        $this->view = $view;
+    public function __construct() {
+        $this->view = RudiContainer::get('RudiView');
     }
 
 }
