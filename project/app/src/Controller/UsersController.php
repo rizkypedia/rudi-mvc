@@ -6,11 +6,11 @@ use RudiMVC\Core\RudiController;
 
 class UsersController extends RudiController 
 {
-    public function __construct(AbstractView $view)
+    public function __construct()
     {
-        parent::__construct($view);
-        
+        parent::__construct();
     }
+    
     public function indexAction()
     {
         $users = [

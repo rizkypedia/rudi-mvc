@@ -29,7 +29,7 @@ class RudiContainer {
     public static function get(string $key)
     {
         if (!array_key_exists($key, static::$registry)) {
-            throw new NotFoundException(sprintf('%s is not found in the service locator.', $key));
+            throw new NotFoundException(sprintf('%s is not found in the Rudi Container.', $key));
         }
 
         return static::$registry[$key];
