@@ -32,9 +32,11 @@ class RequestSplitter{
 
             
             $args = explode("/", $req);
-            $requestParts['api'] = false;
-      
-        
+            $requestParts['api'] = false;      
+            if($args[0]==="api"){
+                $requestParts['api'] = true;
+                array_shift($args);
+            }
             $requestParts['controller'] = ucfirst($args[0]);
             $requestParts['action'] = (empty($args[1]) ? DEFAULT_CONTROLLER_ACTION . ACTION_SUFFIX : $args[1] . ACTION_SUFFIX);
 

@@ -14,10 +14,10 @@ class ControllerFactory {
      * @return AbstractController
      */
     public static function create(string $className):AbstractController {
-        $controller = DEFAULT_NAMESPACE . "\\" . CONTROLLER_SUFFIX . "\\" . $className . CONTROLLER_SUFFIX;
+        $controller = $className;
 
         if(!class_exists($controller)){
-            throw new NotFoundException(sprintf('Non class found with name '. $controller));
+            throw new NotFoundException(sprintf('Non class found with name '. $className));
         }
 
         return  new $controller();        

@@ -27,8 +27,12 @@ class RudiApp {
         if (!empty($uri) && strlen($uri) > 1) {
             $requestSplitter = RequestSplitter::getInstance();
             $requestParameter = $requestSplitter->split_request($uri);
-
-            $controller = ControllerFactory::create($requestParameter['controller']);
+            $className = DEFAULT_NAMESPACE . "\\" . CONTROLLER_SUFFIX . "\\" . $requestParameter['controller'] . CONTROLLER_SUFFIX;
+          
+            if($requestParameter['api'] === true){
+                $className = DEFAULT_NAMESPACE . "\\" . CONTROLLER_SUFFIX . "\\" . "Api" ."\\" . $requestParameter['controller'] ."Api" . CONTROLLER_SUFFIX;
+            }
+            $controller = ControllerFactory::create($className);
            
             return call_user_func_array(array($controller, $requestParameter['action']), $requestParameter['parameters']);
         }
